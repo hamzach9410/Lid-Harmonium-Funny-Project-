@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lid Angle Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #c0ff00;
+            --bg: #0a0a0c;
+            --card-bg: #16161a;
+            --text: #ffffff;
+            --muted: #888891;
+            --shadow: rgba(192, 255, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 50% -20%, #1c1c22 0%, transparent 50%),
+                radial-gradient(circle at 50% 120%, #1c1c22 0%, transparent 50%);
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        h1 {
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 0.3rem;
+            font-size: 1.2rem;
+            color: var(--muted);
+        }
+
+        .display-card {
+            background: var(--card-bg);
+            padding: 4rem 6rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            animation: scanline 4s linear infinite;
+        }
+
+        .display-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(0deg, transparent 0%, rgba(192, 255, 0, 0.03) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .angle-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10rem;
+            color: var(--primary);
+            text-shadow: 0 0 30px var(--shadow);
+            line-height: 1;
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+        }
+
+        .angle-unit {
+            font-size: 4rem;
+            margin-left: 0.5rem;
+        }
+
+        .viz-container {
+            height: 120px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .laptop-viz {
+            width: 150px;
+            height: 10px;
+            background: #2a2a30;
+            position: relative;
+            border-radius: 2px;
+        }
+
+        .lid-viz {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 150px;
+            height: 100px;
+            background: linear-gradient(to top, #3a3a40, #2a2a30);
+            border-radius: 4px 4px 0 0;
+            transform-origin: bottom center;
+            transform: rotateX(0deg);
+            transition: transform 0.1s ease-out;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .status {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4444;
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+        }
+
+        .status-dot.online {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--shadow);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sim-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .sim-badge.active { display: block; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Lid Angle Sensor</h1>
+        </header>
+
+        <main class="display-card">
+            <div id="simBadge" class="sim-badge">SIMULATION MODE</div>
+            <div class="angle-value" id="angleText">
+                0.0<span class="angle-unit">°</span>
+            </div>
+            
+            <div class="viz-container">
+                <div class="laptop-viz">
+                    <div class="lid-viz" id="lidViz"></div>
+                </div>
+            </div>
+        </main>
+
+        <div class="status">
+            <div id="statusDot" class="status-dot"></div>
+            <span id="statusText">Disconnected - Bridge Offline</span>
+        </div>
+    </div>
+
+    <script>
+        const angleText = document.getElementById('angleText');
+        const lidViz = document.getElementById('lidViz');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const simBadge = document.getElementById('simBadge');
+
+        let socket;
+
+        function connect() {
+            socket = new WebSocket('ws://localhost:8765');
+
+            socket.onopen = () => {
+                statusDot.classList.add('online');
+                statusText.innerText = 'Bridge Connected';
+            };
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                const angle = data.angle;
+                
+                // Update UI
+                angleText.innerHTML = `${angle.toFixed(1)}<span class="angle-unit">°</span>`;
+                
+                // Update 3D visualization (SVG-like rotation)
+                // Assuming 0 is closed, 180 is flat. 
+                // We rotate the lid around X axis.
+                const rotation = 180 - angle;
+                lidViz.style.transform = `rotateX(${rotation}deg)`;
+
+                if (data.sim) {
+                    simBadge.classList.add('active');
+                } else {
+                    simBadge.classList.remove('active');
+                }
+            };
+
+            socket.onclose = () => {
+                statusDot.classList.remove('online');
+                statusText.innerText = 'Reconnecting...';
+                simBadge.classList.remove('active');
+                setTimeout(connect, 2000);
+            };
+
+            socket.onerror = (err) => {
+                console.error('Socket error:', err);
+                socket.close();
+            };
+        }
+
+        connect();
+    </script>
+</body>
+</html>

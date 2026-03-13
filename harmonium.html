@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i-Harmonium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --wood: #3d2b1f;
+            --wood-dark: #2a1c14;
+            --gold: #d4af37;
+            --ivory: #fffff0;
+            --black: #1a1a1a;
+            --accent: #c0ff00;
+        }
+
+        body {
+            background-color: #0d0d0d;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
+        }
+
+        .harmonium-body {
+            background: linear-gradient(135deg, var(--wood), var(--wood-dark));
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 4px solid var(--gold);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.5rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .status-bar {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .status-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--gold);
+        }
+
+        .intensity-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .intensity-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, var(--gold), var(--accent));
+            box-shadow: 0 0 10px var(--accent);
+            transition: width 0.1s;
+        }
+
+        .intensity-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .lid-sensor-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+        }
+
+        .indicator.active {
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .angle-container {
+            width: 100%;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .angle-bar {
+            height: 100%;
+            width: 66%;
+            background: linear-gradient(to right, var(--gold), #fff);
+            box-shadow: 0 0 20px var(--gold);
+            transition: width 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .keyboard {
+            display: flex;
+            gap: 4px;
+            padding: 10px;
+            background: #111;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px black;
+        }
+
+        .key {
+            width: 50px;
+            height: 200px;
+            background: var(--ivory);
+            border-radius: 0 0 5px 5px;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 1rem;
+            color: #333;
+            font-weight: 600;
+            transition: all 0.1s;
+            user-select: none;
+            box-shadow: 0 5px 0 #ccc;
+        }
+
+        .key.black {
+            width: 34px;
+            height: 120px;
+            background: var(--black);
+            color: white;
+            margin-left: -19px;
+            margin-right: -19px;
+            z-index: 2;
+            border-radius: 0 0 3px 3px;
+            box-shadow: 0 5px 0 #000;
+        }
+
+        .key:active, .key.pressed {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #999;
+            background: #eee;
+        }
+
+        .key.black:active, .key.black.pressed {
+            box-shadow: 0 1px 0 #000;
+            background: #333;
+        }
+
+        .bellows-viz {
+            width: 100%;
+            height: 60px;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 5px;
+            overflow: hidden;
+        }
+
+        .bellows-fold {
+            flex: 1;
+            background: var(--wood-dark);
+            height: 100%;
+            transform: skewX(10deg);
+            border-left: 2px solid rgba(255,255,255,0.05);
+            transition: transform 0.1s;
+        }
+
+        .bellows-fold:nth-child(even) {
+            transform: skewX(-10deg);
+            background: #222;
+        }
+
+        .controls-hint {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            cursor: pointer;
+        }
+
+        .overlay h2 {
+            border: 2px solid var(--gold);
+            padding: 2rem;
+            color: var(--gold);
+            text-transform: uppercase;
+        }
+
+        .hide { display: none; }
+
+    </style>
+</head>
+<body>
+    <div id="startOverlay" class="overlay">
+        <h2>Click to Start i-Harmonium</h2>
+    </div>
+
+    <div class="harmonium-body">
+        <h1>i-Harmonium</h1>
+        
+        <div class="status-bar">
+            <div class="status-top">
+                <div class="lid-sensor-label" style="font-size: 1.2rem; font-weight: 600;">
+                    <div id="statusDot" class="indicator"></div>
+                    Lid Open: <span id="lidAngleStatus">120.0°</span>
+                </div>
+            </div>
+            <div class="angle-container">
+                <div id="angleBar" class="angle-bar"></div>
+            </div>
+        </div>
+
+        <div class="bellows-viz" id="bellowsViz">
+            <div class="bellows-fold"></div><div class="bellows-fold"></div><div class="bellows-fold"></div>
+            <div class="bellows-fold"></div><div class="bellows-fold"></div><div class="bellows-fold"></div>
+            <div class="bellows-fold"></div><div class="bellows-fold"></div><div class="bellows-fold"></div>
+            <div class="bellows-fold"></div><div class="bellows-fold"></div><div class="bellows-fold"></div>
+        </div>
+
+        <div class="keyboard" id="keyboard">
+            <div class="key" data-note="C4">A</div>
+            <div class="key black" data-note="C#4">W</div>
+            <div class="key" data-note="D4">S</div>
+            <div class="key black" data-note="D#4">E</div>
+            <div class="key" data-note="E4">D</div>
+            <div class="key" data-note="F4">F</div>
+            <div class="key black" data-note="F#4">T</div>
+            <div class="key" data-note="G4">G</div>
+            <div class="key black" data-note="G#4">Y</div>
+            <div class="key" data-note="A4">H</div>
+            <div class="key black" data-note="A#4">U</div>
+            <div class="key" data-note="B4">J</div>
+            <div class="key" data-note="C5">K</div>
+        </div>
+
+        <div class="controls-hint">
+            Use your keyboard keys or click to play. <br>
+            <b>Move your laptop lid</b> to control the bellows (volume).
+        </div>
+    </div>
+
+    <script>
+        // Audio Setup
+        let audioCtx;
+        const activeOscillators = {};
+        let masterGain;
+        let bellowsGain = 0.5;
+
+        const frequencies = {
+            'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13,
+            'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00,
+            'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+            'C5': 523.25
+        };
+
+        const keyMap = {
+            'a': 'C4', 'w': 'C#4', 's': 'D4', 'e': 'D#4', 'd': 'E4',
+            'f': 'F4', 't': 'F#4', 'g': 'G4', 'y': 'G#4', 'h': 'A4',
+            'u': 'A#4', 'j': 'B4', 'k': 'C5'
+        };
+
+        function initAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = 0.5; // Initial master volume
+            masterGain.connect(audioCtx.destination);
+            
+            document.getElementById('startOverlay').classList.add('hide');
+        }
+
+        function createHarmoniumVoice(freq) {
+            // Harmoniums have a rich, slightly detuned "reedy" sound
+            // We'll layer multiple oscillators
+            const voices = [];
+            const voiceGain = audioCtx.createGain();
+            voiceGain.gain.value = 0; // Start silenced
+            voiceGain.connect(masterGain);
+
+            const oscillatorTypes = ['sawtooth', 'square', 'sawtooth'];
+            const detunes = [-5, 0, 5];
+            const gains = [0.1, 0.05, 0.1];
+
+            oscillatorTypes.forEach((type, i) => {
+                const osc = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                osc.detune.setValueAtTime(detunes[i], audioCtx.currentTime);
+                
+                g.gain.setValueAtTime(gains[i], audioCtx.currentTime);
+                
+                osc.connect(g);
+                g.connect(voiceGain);
+                
+                osc.start();
+                voices.push(osc);
+            });
+
+            // Fade in
+            voiceGain.gain.exponentialRampToValueAtTime(1.0, audioCtx.currentTime + 0.05);
+
+            return { voices, voiceGain };
+        }
+
+        function playNote(note) {
+            if (!audioCtx) return;
+            if (activeOscillators[note]) return;
+
+            const voice = createHarmoniumVoice(frequencies[note]);
+            activeOscillators[note] = voice;
+            
+            const keyEl = document.querySelector(`[data-note="${note}"]`);
+            if (keyEl) keyEl.classList.add('pressed');
+        }
+
+        function stopNote(note) {
+            if (activeOscillators[note]) {
+                const voice = activeOscillators[note];
+                const now = audioCtx.currentTime;
+                voice.voiceGain.gain.cancelScheduledValues(now);
+                voice.voiceGain.gain.setValueAtTime(voice.voiceGain.gain.value, now);
+                voice.voiceGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                
+                setTimeout(() => {
+                    voice.voices.forEach(v => v.stop());
+                    delete activeOscillators[note];
+                }, 150);
+
+                const keyEl = document.querySelector(`[data-note="${note}"]`);
+                if (keyEl) keyEl.classList.remove('pressed');
+            }
+        }
+
+        // WebSocket & Sensor Mapping
+        const lidAngleStatus = document.getElementById('lidAngleStatus');
+        const bellowsVal = document.getElementById('bellowsVal');
+        const statusDot = document.getElementById('statusDot');
+        const bellowsViz = document.getElementById('bellowsViz');
+
+        let lastAngle = null;
+        let currentIntensity = 0.2; // Base volume
+        const decayRate = 0.95; // How fast the bellows pressure drops when not moving
+
+        function connectSensor() {
+            const socket = new WebSocket('ws://localhost:8765');
+
+            socket.onopen = () => statusDot.classList.add('active');
+            socket.onclose = () => {
+                statusDot.classList.remove('active');
+                setTimeout(connectSensor, 2000);
+            };
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                const angle = data.angle;
+                
+                lidAngleStatus.innerText = `${angle.toFixed(1)}°`;
+                document.getElementById('angleBar').style.width = `${(angle / 180) * 100}%`;
+
+                if (lastAngle !== null) {
+                    // Calculate "Velocity" - how fast the lid is moving
+                    const delta = Math.abs(angle - lastAngle);
+                    
+                    // If moving, increase intensity (pumping effect)
+                    // If not moving, intensity decays over time
+                    if (delta > 0.1) {
+                        currentIntensity += delta * 0.15; // Increased sensitivity to movement
+                    } else {
+                        currentIntensity *= decayRate;
+                    }
+                }
+                
+                lastAngle = angle;
+
+                // Clamp intensity between 0.1 (minimum sound) and 1.2 (full volume)
+                currentIntensity = Math.min(1.2, Math.max(0.1, currentIntensity));
+
+                if (masterGain) {
+                    // Use a slightly longer ramp for smoother sound
+                    masterGain.gain.setTargetAtTime(currentIntensity, audioCtx.currentTime, 0.1);
+                }
+
+                // Removed bellowsVal and intensityBar updates as requested
+                
+                // Animate bellows folds based on absolute angle (visual) + intensity (vibration)
+                const baseSkew = 10 + ((angle - 90) * 0.5);
+                const jitter = (currentIntensity > 0.5) ? (Math.random() * 2) : 0;
+                const folds = bellowsViz.children;
+                for (let i = 0; i < folds.length; i++) {
+                    const s = (i % 2 === 0) ? baseSkew + jitter : -baseSkew - jitter;
+                    folds[i].style.transform = `skewX(${s}deg)`;
+                }
+            };
+        }
+
+        // Event Listeners
+        document.getElementById('startOverlay').addEventListener('click', initAudio);
+        
+        window.addEventListener('keydown', (e) => {
+            const note = keyMap[e.key.toLowerCase()];
+            if (note) playNote(note);
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const note = keyMap[e.key.toLowerCase()];
+            if (note) stopNote(note);
+        });
+
+        document.getElementById('keyboard').addEventListener('mousedown', (e) => {
+            const note = e.target.getAttribute('data-note');
+            if (note) playNote(note);
+        });
+
+        window.addEventListener('mouseup', () => {
+            Object.keys(activeOscillators).forEach(note => stopNote(note));
+        });
+
+        connectSensor();
+    </script>
+</body>
+</html>
