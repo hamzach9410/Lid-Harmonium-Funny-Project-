@@ -1,3 +1,4 @@
+# Lid-Harmonium-Funny-Project-
 # i-Harmonium & Lid Angle Sensor Project 🎹💻
 
 An interactive digital harmonium that uses your laptop's physical lid angle to control the bellows (volume and intensity).
