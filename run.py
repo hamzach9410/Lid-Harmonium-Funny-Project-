@@ -8,11 +8,11 @@ def run():
     
     # 1. Start the Bridge
     print("📡 Starting Sensor Bridge...")
-    bridge_proc = subprocess.Popen([sys.executable, "bridge.py"])
+    bridge_proc = subprocess.Popen([sys.executable, os.path.join("backend", "bridge.py")])
     
     # 2. Start the Web Servers
     print("🌐 Starting Web Servers...")
-    serve_proc = subprocess.Popen([sys.executable, "serve.py"])
+    serve_proc = subprocess.Popen([sys.executable, os.path.join("backend", "serve.py")])
     
     print("\n" + "="*40)
     print("DONE! Everything is running.")

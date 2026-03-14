@@ -12,14 +12,14 @@ class CheckerHandler(http.server.SimpleHTTPRequestHandler):
     def translate_path(self, path):
         # Always serve index.html for the root or / check
         if path == "/" or path == "/index.html":
-            return os.path.join(DIRECTORY, "index.html")
+            return os.path.join(DIRECTORY, "..", "frontend", "index.html")
         return super().translate_path(path)
 
 class HarmoniumHandler(http.server.SimpleHTTPRequestHandler):
     def translate_path(self, path):
         # Always serve harmonium.html for the root or / harmonium
         if path == "/" or path == "/harmonium.html":
-            return os.path.join(DIRECTORY, "harmonium.html")
+            return os.path.join(DIRECTORY, "..", "frontend", "harmonium.html")
         return super().translate_path(path)
 
 def serve_checker():

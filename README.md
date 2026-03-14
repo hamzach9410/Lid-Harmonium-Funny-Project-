@@ -14,11 +14,18 @@ This project bridges hardware and software to create a unique musical experience
 
 ## 🛠️ Project Structure
 
-- `run.py`: The main entry point that starts everything.
-- `bridge.py`: Python script that reads Windows sensors and broadcasts via WebSockets.
-- `serve.py`: Multi-threaded local server for the web interfaces.
-- `harmonium.html`: The main instrument application.
-- `index.html`: A dedicated Lid Angle checker for testing sensors.
+- `run.py`: The main entry point that starts all services.
+- **`backend/`**:
+  - `bridge.py`: Python script that reads Windows sensors and broadcasts via WebSockets.
+  - `serve.py`: Multi-threaded local server for the web interfaces.
+- **`frontend/`**:
+  - `harmonium.html`: The main instrument application.
+  - `index.html`: A dedicated Lid Angle checker for testing sensors.
+- **`tools/`**:
+  - `check_hinge.py`: Utility to test HingeAngleSensor availability.
+  - `check_sensor.py`: Test script for checking real-time sensor readings.
+  - `list_sensors.py`: Script to list all available Windows sensors.
+  - `test_imports.py`: Verification script for `winsdk` and environment setup.
 
 ## ⚙️ Setup & Installation
 
