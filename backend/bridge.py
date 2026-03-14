@@ -90,8 +90,21 @@ class SensorBridge:
                 self.last_reading = current_display_angle
                 message = json.dumps({"angle": current_display_angle, "sim": self.sim_mode})
                 if self.clients:
-                    await asyncio.gather(*[client.send(message) for client in self.clients])
+                    # Create a list of tasks for sending, capturing potential disconnection errors
+                    tasks = []
+                    for client in list(self.clients):
+                        tasks.append(self.safe_send(client, message))
+                    if tasks:
+                        await asyncio.gather(*tasks)
             await asyncio.sleep(0.05) # 20Hz update rate
+
+    async def safe_send(self, websocket, message):
+        try:
+            await websocket.send(message)
+        except websockets.exceptions.ConnectionClosed:
+            logger.debug("Attempted to send to a closed connection.")
+        except Exception as e:
+            logger.error(f"Error sending message: {e}")
 
 async def main():
     bridge = SensorBridge()
