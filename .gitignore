@@ -17,3 +17,6 @@ env/
 # Project specific
 *.log
 sensors.json
+
+.env
+.env.*
